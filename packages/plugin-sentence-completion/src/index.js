@@ -12,7 +12,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       },
       /** Labels for the buttons. Each different string in the array will generate a different button in the wordbank. */
       choices: {
-        type: ParameterType.STRING,
+        type: jspsych.ParameterType.STRING,
         default: undefined,
         array: true
       },
@@ -90,22 +90,22 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       },
       /** The number of columns in the button grid. Only applicable when `button_layout` is set to `'grid'`. If null, the number of columns will be determined automatically based on the number of buttons and the number of rows. */
       grid_columns: {
-        type: ParameterType.INT,
+        type: jspsych.ParameterType.INT,
         default: null,
       },
     },
     data: {
       /** Reaction time */
       rt: {
-        type: ParameterType.INT,
+        type: jspsych.ParameterType.INT,
       },
       /** The starting sentence presented to participants **/
       sentence: {
-        type: ParameterType.STRING,
+        type: jspsych.ParameterType.STRING,
       },
       /** The final sentence the participant submitted. */
       response: {
-        type: ParameterType.STRING,
+        type: jspsych.ParameterType.STRING,
       },
       // When working in a Javascript environment with no build, you will need to manually put the citations information.
       // You may find it useful to fill in the CITATION.cff file generated with this package and use this script to generate your citations:
@@ -129,24 +129,142 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
     }
     trial(display_element, trial) {
 
-      //
-      let html = `<div class="container" id="textContainer">
-                  </div>
-                  <br><br>
-                  <div class="container" id="wordContainer">
-                  </div>
-                  <br><br>
-                  <div class="container" id="undoContainer">
-                  </div>`;
-      display_element.innerHTML = html;
+      // Sentence
+      let sentences = [trial.sentence];
 
-      // data saving
-      var trial_data = {
-        data1: 99, // Make sure this type and name matches the information for data1 in the data object contained within the info const.
-        data2: "hello world!", // Make sure this type and name matches the information for data2 in the data object contained within the info const.
+      // Create html
+      // Display stimulus
+      const stimulusElement = document.createElement("div");
+      stimulusElement.id = "jspsych-html-button-response-stimulus";
+      stimulusElement.innerHTML = trial.stimulus;
+
+      display_element.appendChild(stimulusElement);
+
+      // Display text
+      const textElement = document.createElement("div");
+      textElement.id = "textContainer";
+
+      display_element.appendChild(textElement);
+      addText(sentences[0]);
+
+      // Display word buttons
+      const buttonGroupElement = document.createElement("div");
+      buttonGroupElement.id = "jspsych-html-button-response-btngroup";
+      if (trial.button_layout === "grid") {
+        buttonGroupElement.classList.add("jspsych-btn-group-grid");
+        if (trial.grid_rows === null && trial.grid_columns === null) {
+          throw new Error(
+            "You cannot set `grid_rows` to `null` without providing a value for `grid_columns`."
+          );
+        }
+        const n_cols =
+          trial.grid_columns === null
+            ? Math.ceil(trial.choices.length / trial.grid_rows)
+            : trial.grid_columns;
+        const n_rows =
+          trial.grid_rows === null
+            ? Math.ceil(trial.choices.length / trial.grid_columns)
+            : trial.grid_rows;
+        buttonGroupElement.style.gridTemplateColumns = `repeat(${n_cols}, 1fr)`;
+        buttonGroupElement.style.gridTemplateRows = `repeat(${n_rows}, 1fr)`;
+      } else if (trial.button_layout === "flex") {
+        buttonGroupElement.classList.add("jspsych-btn-group-flex");
+      }
+
+      for (const [choiceIndex, choice] of trial.choices.entries()) {
+        buttonGroupElement.insertAdjacentHTML("beforeend", trial.button_html(choice, choiceIndex));
+        const buttonElement = buttonGroupElement.lastChild;
+        buttonElement.dataset.choice = choiceIndex.toString();
+        buttonElement.addEventListener("click", () => {
+          console.log(choice);
+          wordClicked(choice);
+        });
+      }
+
+      display_element.appendChild(buttonGroupElement);
+
+      // Display undo button
+      const undoElement = document.createElement("div");
+      undoElement.id = "undoContainer";
+
+      const undo = document.createElement('a');
+      undo.className = 'undo';
+      undo.textContent = trial.undo_button_label;
+      undoElement.appendChild(undo);
+            
+      undo.onclick = function() {
+          undoClicked();
       };
-      // end trial
-      this.jsPsych.finishTrial(trial_data);
+
+      display_element.appendChild(undoElement);
+
+      // Add submit button
+      // TO DO
+
+      // End of trial function
+      const end_trial = () => {
+        // gather the data to store for the trial
+        var trial_data = {
+          rt: response.rt,
+          sentence: trial.sentence,
+          response: response.button,
+        };
+
+        // move on to the next trial
+        this.jsPsych.finishTrial(trial_data);
+      };
+
+      // Functions
+      function undoClicked() {
+          sentences.pop();
+          console.log(sentences);
+          console.log(sentences[sentences.length-1]);
+          addText(sentences[sentences.length-1]);
+      }
+      
+      // Function that handles word clicks
+      function wordClicked(word) {            
+          
+          console.log(word);
+          console.log(sentences);
+          updateText(sentences[sentences.length-1], word);
+          console.log(sentences);
+      }
+
+      function addText(sentence) {
+          let text = document.getElementById('textContainer');
+          text.innerHTML = ``;
+          let ftext;
+          ftext = replaceSpaces(sentence, 6);
+          ftext = ftext.replaceAll("#w#w", "____ ____");
+          ftext = ftext.replaceAll("#w", "____");
+          console.log(ftext);
+
+          text.innerHTML += ftext;
+      }
+
+      function updateText(sentence, word) {
+          let text = document.getElementById('textContainer');
+          let ftext;
+          console.log(word);
+          sentences.push(sentence.replace("#w", word));
+
+          console.log(sentence);
+          ftext = replaceSpaces(sentences[sentences.length-1], 6);
+          ftext = ftext.replaceAll("#w#w", "____ ____");
+          ftext = ftext.replaceAll("#w", "____");
+          console.log(ftext);
+          
+          text.innerHTML = ``;
+          text.innerHTML += ftext;
+
+      }
+
+      function replaceSpaces(str, numSpaces) {
+          const spaces = '&nbsp;'.repeat(numSpaces);
+          return str.replace(/ /g, spaces);
+      }
+
     }
   }
   SentenceCompletionPlugin.info = info;
