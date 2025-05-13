@@ -31,7 +31,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         type: jspsych.ParameterType.BOOL,
         default: true
       },
-      /** Text to display if allow_duplicates is false and the participant attempts to click a button that has already been clicked again. */
+      /** Text to display if `allow_duplicates` is false and the participant attempts to click a button that has already been clicked again. */
       duplicates_warning: {
         type: jspsych.ParameterType.STRING,
         default: "You cannot click the same button more than once."
@@ -95,11 +95,11 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       },
     },
     data: {
-      /** Reaction time */
+      /** The response time in milliseconds for the participant to make a response. The time is measured from when the stimulus first appears on the screen until the participant's response. */
       rt: {
         type: ParameterType.INT,
       },
-      /** The starting sentence presented to participants **/
+      /** The starting sentence presented to the participant. **/
       sentence: {
         type: ParameterType.STRING,
       },
