@@ -31,10 +31,20 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         type: jspsych.ParameterType.BOOL,
         default: true
       },
+      /** Text to display if allow_duplicates is false and the participant attempts to click a button that has already been clicked again. */
+      duplicates_warning: {
+        type: jspsych.ParameterType.STRING,
+        default: "You cannot click the same button more than once."
+      },
       /** If true, then the participant will be required to click every button in the wordbank at least once before they can submit the sentence. */
       use_all_buttons: {
         type: jspsych.ParameterType.BOOL,
         default: false
+      },
+      /** Text to display if use_all_buttons is true and the participant attempts to submit the sentence without clicking all buttons at least once. */
+      all_buttons_warning: {
+        type: jspsych.ParameterType.STRING,
+        default: "You must click every button at least once."
       },
       /** Label to display on the button underneath the wordbank allowing the participant to clear the most recently filled gap. */
       undo_button_label: {
