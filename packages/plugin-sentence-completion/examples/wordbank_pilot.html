@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordbank</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #ffffff;
+        padding: 20px;
+    }
+    
+    .container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .word {
+        width: calc(2.5% - 20px);
+        min-width: 100px;
+        aspect-ratio: 3/2;
+        background-color: rgb(255, 255, 255);
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Add the inner border using :after pseudo-element */
+    .word:after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        bottom: 2px;
+        border: 2px solid #000;
+        border-radius: 8px;
+        pointer-events: none; /* Ensures clicks pass through to the card */
+        transition: border-color 0.3s ease;
+    }
+    
+    .word:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .word:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Make the border white when card is selected for better contrast */
+    .word.selected:after {
+        border-color: black;
+    }
+    
+    .button-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+        opacity: 0;
+        height: 0;
+        transition: opacity 0.5s ease, height 0.5s ease;
+    }
+    
+    .button-container.visible {
+        opacity: 1;
+        height: 50px;
+    }
+    
+    @media (max-width: 900px) {
+        .card {
+            width: calc(50% - 20px);
+        }
+    }
+    
+    @media (max-width: 600px) {
+        .card {
+            width: 100%;
+        }
+    }
+</style>
+<body>
+    <!-- Empty container that will be filled with cards by JavaScript -->
+    <div class="container" id="textContainer">
+    </div>
+    <br><br>
+    <div class="container" id="wordContainer">
+    </div>
+    <br><br>
+    <div class="container" id="undoContainer">
+    </div>
+
+    <script>
+
+        // Sentence
+        let sentences = [`The #w #w#w the #w to the #w.`];
+
+        // List of words
+        let wordList = ["wizard", "give", "s", "queen", "gift"];
+
+        // Create undo
+        const ucontainer = document.getElementById('undoContainer');
+        const undo = document.createElement('a');
+        undo.className = 'undo';
+        undo.textContent = 'undo';
+        ucontainer.appendChild(undo);
+        
+        // Add the click event handler
+        undo.onclick = function() {
+            undoClicked();
+        };
+
+        function undoClicked() {
+            sentences.pop();
+            console.log(sentences);
+            console.log(sentences[sentences.length-1]);
+            addText(sentences[sentences.length-1]);
+        }
+        
+        // Initialize the page when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create cards dynamically
+            addText(sentences[0]);
+            createButtons(wordList);
+        });
+        
+        // Function to create the specified number of words
+        function createButtons(words) {
+            const container = document.getElementById('wordContainer');
+            
+            // Clear the container first (in case we want to recreate words)
+            container.innerHTML = '';
+            
+            // Create each words button and add it to the container
+            for (let i = 0; i < wordList.length; i++) {
+                const word = document.createElement('a');
+                word.className = 'word';
+                word.textContent = words[i];
+                
+                // Add the click event handler
+                word.onclick = function() {
+                    wordClicked(this, i);
+                };
+                
+                // Add the card to the container
+                container.appendChild(word);
+            }
+        }
+        
+        // Function that handles word clicks
+        function wordClicked(wordElement, wordNumber) {            
+            // Select the clicked card
+            //wordElement.classList.add('selected');
+            selectedWord = wordElement;
+            
+            // Find fragments
+            console.log(wordElement.text);
+            console.log(sentences);
+            updateText(sentences[sentences.length-1], wordElement.text);
+            console.log(sentences);
+        }
+
+        function addText(sentence) {
+            let text = document.getElementById('textContainer');
+            text.innerHTML = ``;
+            let ftext;
+            ftext = replaceSpaces(sentence, 6);
+            ftext = ftext.replaceAll("#w#w", "____ ____");
+            ftext = ftext.replaceAll("#w", "____");
+            console.log(ftext);
+
+            text.innerHTML += ftext;
+        }
+
+        function updateText(sentence, word) {
+            let text = document.getElementById('textContainer');
+            let ftext;
+            console.log(word);
+            sentences.push(sentence.replace("#w", word));
+
+            console.log(sentence);
+            ftext = replaceSpaces(sentences[sentences.length-1], 6);
+            ftext = ftext.replaceAll("#w#w", "____ ____");
+            ftext = ftext.replaceAll("#w", "____");
+            console.log(ftext);
+            
+            text.innerHTML = ``;
+            text.innerHTML += ftext;
+
+        }
+
+        function replaceSpaces(str, numSpaces) {
+            const spaces = '&nbsp;'.repeat(numSpaces);
+            return str.replace(/ /g, spaces);
+        }
+
+        console.log(replaceSpaces(sentences[0], 4));
+
+
+        
+        /*
+        // Function that executes when submit button is clicked
+        function submitSelection() {
+            if (selectedCard) {
+                // Log the selection
+                const cardText = selectedCard.textContent;
+                console.log(`Form submitted with selection: ${cardText}`);
+                //alert(`You submitted with ${cardText} selected!`);
+
+                // Increment index
+                index++;
+                
+                // Hide the submit button
+                document.getElementById('submitContainer').classList.add('hidden');
+
+                // Reset the cards
+                const container = document.getElementById('cardContainer');
+                container.replaceChildren();
+
+                setTimeout(createCards(cardList[index]),
+                1000);
+
+            } else {
+                alert('Please select a card first');
+            }
+        }
+        */
+    </script>
+</body>
+</html>

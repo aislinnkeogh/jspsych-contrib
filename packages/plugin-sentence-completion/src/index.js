@@ -95,12 +95,16 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       },
     },
     data: {
-      /** Provide a clear description of the data1 that could be used as documentation. We will eventually use these comments to automatically build documentation and produce metadata. */
-      data1: {
+      /** Reaction time */
+      rt: {
         type: ParameterType.INT,
       },
-      /** Provide a clear description of the data2 that could be used as documentation. We will eventually use these comments to automatically build documentation and produce metadata. */
-      data2: {
+      /** The starting sentence presented to participants **/
+      sentence: {
+        type: ParameterType.STRING,
+      },
+      /** The final sentence the participant submitted. */
+      response: {
         type: ParameterType.STRING,
       },
       // When working in a Javascript environment with no build, you will need to manually put the citations information.
@@ -124,6 +128,18 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       this.jsPsych = jsPsych;
     }
     trial(display_element, trial) {
+
+      //
+      let html = `<div class="container" id="textContainer">
+                  </div>
+                  <br><br>
+                  <div class="container" id="wordContainer">
+                  </div>
+                  <br><br>
+                  <div class="container" id="undoContainer">
+                  </div>`;
+      display_element.innerHTML = html;
+
       // data saving
       var trial_data = {
         data1: 99, // Make sure this type and name matches the information for data1 in the data object contained within the info const.
