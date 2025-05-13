@@ -243,7 +243,16 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       }
 
       function submitClicked() {
-        console.log("Not implemented")
+        // console.log("Not implemented")
+        let all_gaps_filled;
+        if (choices_used.length==n_gaps) {all_gaps_filled = true} else {all_gaps_filled = false};
+        let buttons_used;
+        if (trial.use_all_buttons) {
+          if (trial.choices.sort().join(",")==choices_used.sort().join(",")) {buttons_used = true} else {buttons_used = false}
+        } else {
+          buttons_used = true
+        };
+        if (all_gaps_filled && buttons_used) {end_trial()};
       }
       
       // Function that handles word clicks
