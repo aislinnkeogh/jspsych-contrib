@@ -7,6 +7,7 @@
   <!-- Load the published plugin package here, e.g.
 <script src="https://unpkg.com/plugin-sentence-completion"></script>
 <script src="../dist/index.global.js"></script> -->
+  <script src="../src/index.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/jspsych/css/jspsych.css">
 </head>
 
@@ -15,7 +16,9 @@
   const jsPsych = initJsPsych();
 
   const trial = {
-    type: jsPsychPluginSentenceCompletion
+    type: jsPsychPluginSentenceCompletion,
+    sentence: `The #w #w#w the #w to the #w.`,
+    choices: ["wizard", "give", "s", "queen", "gift"]
   };
 
   jsPsych.run([trial])
