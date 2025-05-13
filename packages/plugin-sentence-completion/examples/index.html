@@ -18,7 +18,9 @@
   const trial = {
     type: jsPsychPluginSentenceCompletion,
     sentence: `The #w #w#w the #w to the #w.`,
-    choices: ["wizard", "give", "s", "queen", "gift"]
+    choices: ["wizard", "give", "s", "queen", "gift"],
+    randomize_order: true,
+    allow_duplicates: false
   };
 
   jsPsych.run([trial])

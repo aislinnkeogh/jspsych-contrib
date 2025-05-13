@@ -129,6 +129,11 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
     }
     trial(display_element, trial) {
 
+      // Randomize choice order
+      if (trial.randomize_order) {
+        trial.choices = jsPsych.randomization.repeat(trial.choices, 1);
+      }
+
       // Sentence
       let sentences = [trial.sentence];
 
@@ -138,7 +143,6 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
 
       // Count gaps in sentence
       n_gaps = trial.sentence.split("#w").length-1;
-      console.log(n_gaps);
 
       // Create html
       // Display stimulus
@@ -184,9 +188,12 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         const buttonElement = buttonGroupElement.lastChild;
         buttonElement.dataset.choice = choiceIndex.toString();
         buttonElement.addEventListener("click", () => {
-          console.log(choice);
-          wordClicked(choice);
-          choices_used.push(choice);
+          if ((trial.allow_duplicates) || !choices_used.includes(choice)) {
+            wordClicked(choice);
+            choices_used.push(choice);
+          } else {
+            alert(trial.duplicates_warning);
+          }
         });
       }
 
@@ -196,9 +203,9 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       const fnElement = document.createElement("div");
       fnElement.id = "fnContainer";
 
-      const undo = document.createElement('a');
+      const undo = document.createElement('button');
       undo.id = 'undo';
-      undo.class = `jspsych-btn`;
+      undo.setAttribute(`class`, `jspsych-btn`);
       undo.textContent = trial.undo_button_label;
       fnElement.appendChild(undo);
             
@@ -206,9 +213,9 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
           undoClicked();
       };
 
-      const submit = document.createElement('a');
+      const submit = document.createElement('button');
       submit.id = 'submit';
-      submit.class = `jspsych-btn`;
+      submit.setAttribute(`class`, `jspsych-btn`);
       submit.textContent = trial.submit_button_label;
       fnElement.appendChild(submit);
             
@@ -225,9 +232,9 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       const end_trial = () => {
         // gather the data to store for the trial
         var trial_data = {
-          rt: response.rt,
+          rt: trial.rt,
           sentence: trial.sentence,
-          response: response.button,
+          response: sentences[sentences.length-1],
         };
 
         // move on to the next trial
@@ -237,40 +244,48 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       // Functions
       function undoClicked() {
           sentences.pop();
-          console.log(sentences);
-          console.log(sentences[sentences.length-1]);
           addText(sentences[sentences.length-1]);
+          choices_used.pop();
       }
 
       function submitClicked() {
         // console.log("Not implemented")
         let all_gaps_filled;
-        if (choices_used.length==n_gaps) {all_gaps_filled = true} else {all_gaps_filled = false};
+        if (choices_used.length==n_gaps) {
+          all_gaps_filled = true
+        } else {
+          all_gaps_filled = false
+        };
         let buttons_used;
         if (trial.use_all_buttons) {
-          if (trial.choices.sort().join(",")==choices_used.sort().join(",")) {buttons_used = true} else {buttons_used = false}
+          if (trial.choices.sort().join(",")==choices_used.sort().join(",")) {
+            buttons_used = true
+          } else {
+            buttons_used = false
+          }
         } else {
           buttons_used = true
         };
-        if (all_gaps_filled && buttons_used) {end_trial()};
+        if (all_gaps_filled && buttons_used) {
+          end_trial();
+        } else {
+          alert(trial.all_buttons_warning);
+        }
       }
       
       // Function that handles word clicks
       function wordClicked(word) {            
-          console.log(word);
-          console.log(sentences);
           updateText(sentences[sentences.length-1], word);
-          console.log(sentences);
       }
 
       function addText(sentence) {
           let text = document.getElementById('textContainer');
           text.innerHTML = ``;
+
           let ftext;
           ftext = replaceSpaces(sentence, 6);
           ftext = ftext.replaceAll("#w#w", "____ ____");
           ftext = ftext.replaceAll("#w", "____");
-          console.log(ftext);
 
           text.innerHTML += ftext;
       }
@@ -278,14 +293,11 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       function updateText(sentence, word) {
           let text = document.getElementById('textContainer');
           let ftext;
-          console.log(word);
           sentences.push(sentence.replace("#w", word));
 
-          console.log(sentence);
           ftext = replaceSpaces(sentences[sentences.length-1], 6);
           ftext = ftext.replaceAll("#w#w", "____ ____");
           ftext = ftext.replaceAll("#w", "____");
-          console.log(ftext);
           
           text.innerHTML = ``;
           text.innerHTML += ftext;
