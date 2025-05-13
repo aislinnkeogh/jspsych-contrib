@@ -132,6 +132,14 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       // Sentence
       let sentences = [trial.sentence];
 
+      // Initialize variables for checks
+      let n_gaps;
+      let choices_used = [];
+
+      // Count gaps in sentence
+      n_gaps = trial.sentence.split("#w").length-1;
+      console.log(n_gaps);
+
       // Create html
       // Display stimulus
       const stimulusElement = document.createElement("div");
@@ -178,25 +186,37 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         buttonElement.addEventListener("click", () => {
           console.log(choice);
           wordClicked(choice);
+          choices_used.push(choice);
         });
       }
 
       display_element.appendChild(buttonGroupElement);
 
       // Display undo button
-      const undoElement = document.createElement("div");
-      undoElement.id = "undoContainer";
+      const fnElement = document.createElement("div");
+      fnElement.id = "fnContainer";
 
       const undo = document.createElement('a');
-      undo.className = 'undo';
+      undo.id = 'undo';
+      undo.class = `jspsych-btn`;
       undo.textContent = trial.undo_button_label;
-      undoElement.appendChild(undo);
+      fnElement.appendChild(undo);
             
       undo.onclick = function() {
           undoClicked();
       };
 
-      display_element.appendChild(undoElement);
+      const submit = document.createElement('a');
+      submit.id = 'submit';
+      submit.class = `jspsych-btn`;
+      submit.textContent = trial.submit_button_label;
+      fnElement.appendChild(submit);
+            
+      submit.onclick = function() {
+          submitClicked();
+      };
+
+      display_element.appendChild(fnElement);
 
       // Add submit button
       // TO DO
@@ -221,10 +241,13 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
           console.log(sentences[sentences.length-1]);
           addText(sentences[sentences.length-1]);
       }
+
+      function submitClicked() {
+        console.log("Not implemented")
+      }
       
       // Function that handles word clicks
       function wordClicked(word) {            
-          
           console.log(word);
           console.log(sentences);
           updateText(sentences[sentences.length-1], word);
