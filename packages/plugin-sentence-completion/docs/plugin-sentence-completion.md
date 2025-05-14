@@ -1,6 +1,6 @@
-# plugin-sentence-completion
+# plugin-sentence-construction
 
-Shows the participant either a sentence containing some gaps (when a sentence with gaps indicated by '#w' is entered as the 'sentence' parameter) or a blank line (when the sentence parameter is empty), and a bank of buttons. Each button click fills in a gap or adds to the sentence.
+This plugin provides a bank of buttons, and allows the participant to build a sentence piece-by-piece on-screen by clicking those buttons. They can either build the sentence from scratch, or the experimenter can provide a sentence frame to the `sentence` parameter (with gaps to-be-filled indicated by `#w`). Each button click adds one element to the sentence. Elements can be whole words or smaller pieces (syllables or morphemes).
 
 ## Parameters
 
@@ -8,12 +8,13 @@ In addition to the [parameters available in all plugins](https://www.jspsych.org
 
 | Parameter           | Type             | Default Value      | Description                              |
 | ------------------- | ---------------- | ------------------ | ---------------------------------------- |
-| sentence            | string           | undefined          | The sentence for the participant to complete. Each #w will be replaced with one gap to be filled. Whitespace in the displayed sentence is determined by whitespace in the provided string e.g. #w#w will display two adjacent gaps (i.e. syllables/morphemes within a word), while #w #w will display two gaps separated by whitespace (i.e. separate words). If this parameter is null, participants will start with a blank line and build a sentence with their button presses. |
+| sentence            | string           | null               | The sentence for the participant to complete. Each `#w` will be replaced with one gap to be filled. Whitespace in the displayed sentence is determined by whitespace in the provided string e.g. `#w#w` will display two adjacent gaps (i.e. syllables/morphemes within a word), while `#w #w` will display two gaps separated by whitespace (i.e. separate words). If this parameter is null, participants will start with a blank line and build a sentence with their button presses. |
 | choices             | array of strings | undefined          | Labels for the buttons. Each different string in the array will generate a different button in the wordbank. |
 | stimulus            | HTML string      | null               | An HTML string to be displayed if the participant is completing the sentence based on some stimulus (e.g. an image that they need to describe). |
 | randomize_order     | boolean          | true               | If true, then the buttons in the wordbank will be randomly shuffled. |
 | allow_duplicates    | boolean          | true               | If true, then the participant can click the same button to fill multiple gaps in the sentence. |
 | duplicates_warning  | string           | 'You cannot click the same button more than once.' | Text to display if `allow_duplicates` is false and the participant attempts to click a button that has already been clicked again. |
+| disable_buttons_after_click | boolean  | false              | If true and `allow_duplicates` is false, each button in the wordbank will be disabled after it has been clicked. |
 | use_all_buttons     | boolean          | false              | If true, then the participant will be required to click every button in the wordbank at least once before they can submit the sentence. |
 | all_buttons_warning | string           | 'You must click every button at least once.' | Text to display if use_all_buttons is true and the participant attempts to submit the sentence without clicking all buttons at least once. |
 | undo_button_label   | HTML string      | 'UNDO'             | Label to display on the button underneath the wordbank allowing the participant to clear the most recently filled gap. This string can contain HTML markup. |
@@ -27,7 +28,8 @@ In addition to the [parameters available in all plugins](https://www.jspsych.org
 | max_width      | numeric          | 600               | The maximum  width of the text on the screen. |
 | button_layout       | string           | 'grid'             | Setting to `'grid'` will make the container element have the CSS property `display: grid` and enable the use of `grid_rows` and `grid_columns`. Setting to `'flex'` will make the container element have the CSS property `display: flex`. You can customize how the buttons are laid out by adding inline CSS in the `button_html` parameter. |
 | grid_rows           | numeric          | 1                  | The number of rows in the button grid. Only applicable when `button_layout` is set to `'grid'`. If null, the number of rows will be determined automatically based on the number of buttons and the number of columns. |
-| grid_columns        | numeric          | null               | The number of columns in the button grid. Only applicable when `button_layout` is set to `'grid'`. If null, the number of columns will be determined automatically based on the number of buttons and the number of rows.
+| grid_columns        | numeric          | null               | The number of columns in the button grid. Only applicable when `button_layout` is set to `'grid'`. If null, the number of columns will be determined automatically based on the number of buttons and the number of rows. |
+| spaces_between_words | numeric         | 6                  | The number of spaces between words in the fill-in-the-blank sentence. |
 
 ## Data Generated
 
