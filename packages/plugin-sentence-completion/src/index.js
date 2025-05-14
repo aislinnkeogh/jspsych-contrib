@@ -194,6 +194,7 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
 
       display_element.appendChild(textElement);
       
+      // Generate the starting text
       if (trial.sentence == null) {
         displayUnderline();
       } else {
@@ -262,6 +263,8 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
       submit.setAttribute(`class`, `jspsych-btn`);
       submit.textContent = trial.submit_button_label;
       
+      
+      // Disable submit button if not all gaps filled and there is a sentence frame
       if (trial.disable_submit_before_completion && !(choices_used.length == n_gaps) && trial.sentence != null) {
         submit.setAttribute("disabled", "disabled");
       }
@@ -323,6 +326,7 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
         }
       }
 
+      // Function that handles submit button
       function submitClicked() {
         // Check whether all gaps have been filled
         let all_gaps_filled = true;
@@ -336,6 +340,7 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
           buttons_used = trial.choices.sort().join(",")==choices_used.sort().join(",")
         }
         
+        // If all gaps are filled and all buttons have been used, end the trial
         if (all_gaps_filled && buttons_used) {
           end_trial();
         } else {
@@ -356,11 +361,13 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
           addText(sentences[sentences.length-1]);
       }
 
+      // Function that generates the underline for when there is no sentence frame
       function displayUnderline() {
         let text = document.getElementById('textContainer');
         text.innerHTML = '___________';
       }
 
+      // Function that updates button group 
       function updateButtonHTML() {
         // Check whether the Submit button needs to be enabled/disabled
         if (trial.disable_submit_before_completion) {
@@ -382,6 +389,7 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
           }
         }
 
+        // If the researcher has selected to disable buttons after clicking, then disable the buttons that have been used
         if (trial.disable_buttons_after_click) {
           let buttons = buttonGroupElement.children;
 
@@ -397,6 +405,7 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
 
       }
 
+      // Function that replaces spaces in the sentence with the correct number of spaces (if a frame is provided)
       function addText(sentence) {
         let text = document.getElementById('textContainer');
         text.innerHTML = '';
@@ -413,17 +422,20 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
         text.innerHTML += ftext;
       }
 
+      // Function that updates the sentence with the new word
       function updateText(sentences, word) {
         
         let sentence = sentences[sentences.length-1];
         let newSentence;
         let nospace = false;
 
+        // If the word starts with a hyphen, remove it and set nospace to true: this allows for the handling of morpheme-level gaps
         if (word.startsWith("-")) {
           word = word.replace(`-`, ``);
           nospace = true;
         }
         
+        // update and replace sentence
         if (trial.sentence == null) {
           nospace = sentence.length === 0 || nospace;
           newSentence = sentence += (nospace ? '' : ' ') + word;
@@ -445,6 +457,7 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
           return str.replace(/ /g, spaces);
       }
 
+      // Function that adds breaks to the sentence
       function addBreaks(sentence) {
         // Max width
         let maxWidth = Math.floor(trial.max_width/5);
