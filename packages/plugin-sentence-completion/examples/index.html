@@ -13,14 +13,21 @@
 
 <body></body>
 <script>
-  const jsPsych = initJsPsych();
+  const jsPsych = initJsPsych({
+    on_finish: function() {
+        jsPsych.data.displayData();
+      }
+  });
 
   const trial = {
     type: jsPsychPluginSentenceCompletion,
-    sentence: `The #w #w#w the #w to the #w.`,
-    choices: ["wizard", "give", "s", "queen", "gift"],
+    sentence: `The #w #w#w the #w to the #w, who #w to the #w and then #w down by the #w.`,
+    choices: ["wizard", "give", "s", "queen", "gift", "a", "b", "c", "d", "e", "f", "g", "h", "i",
+      "j", "k", "l", "m", "n"
+    ],
     randomize_order: true,
-    allow_duplicates: false
+    allow_duplicates: false,
+    grid_rows: 3
   };
 
   jsPsych.run([trial])

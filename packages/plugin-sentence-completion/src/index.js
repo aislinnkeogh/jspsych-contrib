@@ -129,37 +129,42 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
     }
     trial(display_element, trial) {
 
-      // Randomize choice order
+      // Record start time and declare rt
+      let start_time = performance.now();
+      let rt;
+
+      // Randomize choice order if options selected
       if (trial.randomize_order) {
         trial.choices = jsPsych.randomization.repeat(trial.choices, 1);
       }
 
-      // Sentence
+      // Create array of sentences (will append for quick undo)
       let sentences = [trial.sentence];
 
-      // Initialize variables for checks
-      let n_gaps;
+      // Initialize array of choices used (for end-of-trial checks)
       let choices_used = [];
 
-      // Count gaps in sentence
+      // Count gaps in sentence (for end-of-trial checks)
+      let n_gaps;
       n_gaps = trial.sentence.split("#w").length-1;
 
-      // Create html
-      // Display stimulus
+      // Create html element for stimulus
       const stimulusElement = document.createElement("div");
       stimulusElement.id = "jspsych-html-button-response-stimulus";
       stimulusElement.innerHTML = trial.stimulus;
 
       display_element.appendChild(stimulusElement);
 
-      // Display text
+      // Create html element for text
       const textElement = document.createElement("div");
       textElement.id = "textContainer";
 
       display_element.appendChild(textElement);
       addText(sentences[0]);
 
-      // Display word buttons
+      wrapText("textContainer", 600)
+
+      // Create word buttons
       const buttonGroupElement = document.createElement("div");
       buttonGroupElement.id = "jspsych-html-button-response-btngroup";
       if (trial.button_layout === "grid") {
@@ -199,7 +204,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
 
       display_element.appendChild(buttonGroupElement);
 
-      // Display undo button
+      // Create undo and submit buttons
       const fnElement = document.createElement("div");
       fnElement.id = "fnContainer";
 
@@ -225,14 +230,11 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
 
       display_element.appendChild(fnElement);
 
-      // Add submit button
-      // TO DO
-
       // End of trial function
       const end_trial = () => {
         // gather the data to store for the trial
         var trial_data = {
-          rt: trial.rt,
+          rt: rt,
           sentence: trial.sentence,
           response: sentences[sentences.length-1],
         };
@@ -249,7 +251,11 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       }
 
       function submitClicked() {
-        // console.log("Not implemented")
+        // measure rt
+        let end_time = performance.now();
+        rt = Math.round(end_time - start_time);
+
+        // Check
         let all_gaps_filled;
         if (choices_used.length==n_gaps) {
           all_gaps_filled = true
@@ -307,6 +313,15 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       function replaceSpaces(str, numSpaces) {
           const spaces = '&nbsp;'.repeat(numSpaces);
           return str.replace(/ /g, spaces);
+      }
+
+      function wrapText(elementId, maxWidth) {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.style.width = maxWidth + "px";
+          element.style.overflowWrap = "break-word"; //or element.style.overflowWrap = "break-word"
+          element.style.whiteSpace = "normal";
+        }
       }
 
     }
