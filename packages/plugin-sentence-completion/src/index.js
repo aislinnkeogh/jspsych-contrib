@@ -107,7 +107,11 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
       spaces_between_words: {
         type: jspsych.ParameterType.INT,
         default: 6,
-      }
+      },
+      right_to_left: {
+        type: jspsych.ParameterType.BOOL,
+        default: false,
+      },
     },
     data: {
       /** The response time in milliseconds for the participant to make a response. The time is measured from when the stimulus first appears on the screen until the participant's response. */
@@ -158,6 +162,7 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
       } else {
         sentences.push('');
       }
+ 
 
       // Count gaps in sentence (for end-of-trial checks)
       let n_gaps = 0;
@@ -182,6 +187,9 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
       //textElement.style.width = trial.max_width + "px";
       textElement.style.overflowWrap = "normal";
       textElement.style.whiteSpace = "normal";
+      if (trial.right_to_left) {
+        textElement.style.direction = "rtl";
+      }
 
       display_element.appendChild(textElement);
       
@@ -414,27 +422,33 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
 
       // Function that updates the sentence with the new word
       function updateText(sentences, word) {
-        
         let sentence = sentences[sentences.length-1];
         let newSentence;
         let nospace = false;
-
-        // If the word starts with a hyphen, remove it and set nospace to true: this allows for the handling of morpheme-level gaps
+    
+        // Handle hyphen at start of word
         if (word.startsWith("-")) {
-          word = word.replace(`-`, ``);
-          nospace = true;
+            word = word.replace(`-`, ``);
+            nospace = true;
         }
         
-        // update and replace sentence
+        // Update and replace sentence
         if (trial.sentence == null) {
-          nospace = sentence.length === 0 || nospace;
-          newSentence = sentence += (nospace ? '' : ' ') + word;
-          sentences.push(newSentence);
+            nospace = sentence.length === 0 || nospace;
+            if (trial.right_to_left) {
+                // For RTL, add new words to the beginning instead of the end
+                newSentence =  word + (nospace ? '' : ' ') + sentence;
+            } else {
+                // Original LTR behavior
+                newSentence = sentence + (nospace ? '' : ' ') + word;
+            }
+            sentences.push(newSentence);
         } else {
-          newSentence = sentence.replace("#w", word);
-          sentences.push(newSentence);
+            // For structured sentences with gaps marked by #w
+            newSentence = sentence.replace("#w", word);
+            sentences.push(newSentence);
         }
-      }
+    }
 
       function replaceSpaces(str, numSpaces) {
           let halfSpaces = Math.floor(numSpaces/2);
