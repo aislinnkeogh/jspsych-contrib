@@ -88,6 +88,11 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         type: jspsych.ParameterType.INT,
         default: null,
       },
+      /** The maximum width of the text on the screen **/
+      max_width: {
+        type: jspsych.ParameterType.INT,
+        default: 600,
+      },
       /** Setting to `'grid'` will make the container element have the CSS property `display: grid` and enable the use of `grid_rows` and `grid_columns`. Setting to `'flex'` will make the container element have the CSS property `display: flex`. You can customize how the buttons are laid out by adding inline CSS in the `button_html` parameter. */
       button_layout: {
         type: jspsych.ParameterType.STRING,
@@ -134,6 +139,9 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       this.jsPsych = jsPsych;
     }
     trial(display_element, trial) {
+
+      // Set spaces between words
+      let wordSpaces = 6;
       // Record start time and declare rt
       let start_time = performance.now();
       let rt;
@@ -144,7 +152,12 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       }
 
       // Create array of sentences (will append for quick undo)
-      let sentences = [trial.sentence];
+      let sentences = [];
+      if (trial.sentence !== null) {
+        sentences.push(addBreaks(trial.sentence));
+      } else {
+        sentences.push('');
+      }
 
       // Count gaps in sentence (for end-of-trial checks)
       let n_gaps = 0;
@@ -169,6 +182,10 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       // Create html element for text
       const textElement = document.createElement("div");
       textElement.id = "textContainer";
+      //textElement.style.width = trial.max_width + "px";
+      textElement.style.overflowWrap = "normal";
+      textElement.style.whiteSpace = "normal";
+
       display_element.appendChild(textElement);
       
       if (trial.sentence == null) {
@@ -176,8 +193,6 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       } else {
         addText(sentences[0]);
       }
-      
-      wrapText("textContainer", 600);
 
       // Create word buttons
       const buttonGroupElement = document.createElement("div");
@@ -354,9 +369,10 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         text.innerHTML = '';
 
         let ftext;
-        ftext = replaceSpaces(sentence, 6);
+        ftext = replaceSpaces(sentence, wordSpaces);
         ftext = ftext.replaceAll("#w#w", "____&nbsp;____");
         ftext = ftext.replaceAll("#w", "____");
+        ftext = ftext.replaceAll("#b", "<br>");
 
         text.innerHTML += ftext;
       }
@@ -381,6 +397,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
           let ftext = replaceSpaces(newSentence, 6);
           ftext = ftext.replaceAll("#w#w", "____&nbsp;____");
           ftext = ftext.replaceAll("#w", "____");
+          ftext = ftext.replaceAll("#b", "<br>");
           
           text.innerHTML = ftext;
         }
@@ -395,19 +412,81 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       }
 
       function replaceSpaces(str, numSpaces) {
-        const spaces = '&nbsp;'.repeat(numSpaces);
-        return str.replace(/ /g, spaces);
+          let halfSpaces = Math.floor(numSpaces/2);
+          let spaces;
+          if (numSpaces % 2 == 1) {
+            spaces = '&nbsp;'.repeat(halfSpaces) + ' ' + '&nbsp;'.repeat(halfSpaces);
+          } else {
+            spaces = '&nbsp;'.repeat(halfSpaces) + ' ' + '&nbsp;'.repeat(halfSpaces-1);
+          }
+          return str.replace(/ /g, spaces);
       }
 
-      // Function to wrap the text the way we want
-      function wrapText(elementId, maxWidth) {
-        const element = document.getElementById(elementId);
-        if (element) {
-          element.style.width = maxWidth + "px";
-          element.style.overflowWrap = "break-word";
-          element.style.whiteSpace = "normal";
+      function addBreaks(sentence) {
+        // Max width
+        let maxWidth = Math.floor(trial.max_width/5);
+
+        // Figure out total length of text on screen
+        let ftext = sentence.replaceAll(/ /g, "B".repeat(wordSpaces));
+        ftext = ftext.replaceAll("#w#w", "____B____");
+        ftext = ftext.replaceAll("#w", "____");
+        let total_length = ftext.length;
+
+        // Figure out number of lines, line length, and positions of breaks
+        let lines = Math.ceil(total_length/maxWidth);
+        let line_length = Math.ceil(total_length/lines);
+        let breaks = [];
+        
+        for (let i = 0; i < lines-1; i++) {
+          breaks.push((i+1)*line_length);
         }
+
+        // Go character by character and insert #b (which will be replaced with <br>)
+        // between words after max length has been reached
+        let out = ``;
+        let length = 0;
+        let prevlength = 0;
+        let prevword = false;
+        let needbreak = false;
+
+        for (let i = 0; i < sentence.length; i++) {
+          prevlength = length;
+          let t = sentence[i];
+          if (t == "#") {
+            if (!prevword) {
+              length += 4; // Words take up four spaces
+            } else {
+              length += 5; // Words after words take up five spaces (including space)
+            }
+            prevword = true; // Flag that previous was word
+            i++; // Add double to i so skip entire #w
+          } else {
+            prevword = false;
+            if (t == " ") {
+              length += 6;
+            } else {
+              length += 1;
+            }
+          }
+          if ((length >= breaks[0]) && (prevlength < breaks[0])){
+            needbreak = true;
+            breaks.shift();
+          }
+          if ((t == " ") && needbreak) {
+            out += "#b";
+            needbreak = false;
+          }
+
+          if (t == "#") {
+            out += t + "w";
+          } else {
+            out += t;
+          }
+          
+        }
+        return(out)
       }
+
     }
   }
   SentenceCompletionPlugin.info = info;
