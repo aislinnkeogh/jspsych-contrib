@@ -174,10 +174,6 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       stimulusElement.innerHTML = trial.stimulus;
       display_element.appendChild(stimulusElement);
 
-      // Create prompt element if provided
-      if (trial.prompt !== null) {
-        display_element.insertAdjacentHTML("beforeend", `<div id="jspsych-html-button-response-prompt">${trial.prompt}</div><br><br>`);
-      }
 
       // Create html element for text
       const textElement = document.createElement("div");
@@ -266,6 +262,25 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       };
 
       display_element.appendChild(fnElement);
+
+      // Create prompt element if provided
+      if (trial.prompt !== null) {
+        display_element.insertAdjacentHTML("beforeend", `<div id="jspsych-html-button-response-prompt">${trial.prompt}</div><br><br>`);
+      }
+
+      // Remove Stimulus after stimulus_duration
+      if (trial.stimulus_duration !== null) {
+        this.jsPsych.pluginAPI.setTimeout(function () {
+          stimulusElement.style.visibility = "hidden";
+        }, trial.stimulus_duration);
+      }
+
+      // Remove trial after trial_duration
+      if (trial.trial_duration !== null) {
+        this.jsPsych.pluginAPI.setTimeout(function () {
+          end_trial();
+        }, trial.trial_duration);
+      }
 
       // End of trial function
       const end_trial = () => {

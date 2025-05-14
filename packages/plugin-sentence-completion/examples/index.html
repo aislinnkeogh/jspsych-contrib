@@ -27,7 +27,10 @@
     allow_duplicates: true,
     use_all_buttons: false,
     grid_rows: 2, 
-    prompt: "Press a button to complete the sentence:",
+    prompt: "Use the buttons to complete the sentence.",
+    trial_duration: 5000,
+    stimulus_duration: 1000,
+    stimulus: "Hello world!",
   };
 
   jsPsych.run([trial])
