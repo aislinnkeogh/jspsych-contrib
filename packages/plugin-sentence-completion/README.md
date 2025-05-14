@@ -2,7 +2,7 @@
 
 ## Overview
 
-Shows the participant either a sentence containing some gaps (when a string is entered as the 'sentence' argument) or a blank line (when there is no 'sentence' argument), and a bank of buttons. Each button click fills in a gap.
+This plugin provides a bank of buttons, and allows the participant to build a sentence piece-by-piece on-screen by clicking those buttons. They can either build the sentence from scratch, or the experimenter can provide a sentence frame to the `sentence` parameter (with gaps to-be-filled indicated by `#w`). Each button click adds one element to the sentence. Elements can be whole words or smaller pieces (syllables or morphemes).
 
 ## Loading
 

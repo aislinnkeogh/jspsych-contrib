@@ -108,6 +108,7 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
         type: jspsych.ParameterType.INT,
         default: 6,
       },
+      /** If true, then the sentence will be constructed on-screen from right-to-left (useful for RTL scripts like Arabic or Hebrew). */
       right_to_left: {
         type: jspsych.ParameterType.BOOL,
         default: false,
@@ -133,7 +134,10 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
   /**
    * **plugin-sentence-construction**
    *
-   * Shows the participant a sentence containing some gaps, and a bank of buttons. Each button click fills in one gap.
+   * This plugin provides a bank of buttons, and allows the participant to build a sentence piece-by-piece on-screen by clicking those buttons. 
+   * They can either build the sentence from scratch, or the experimenter can provide a sentence frame to the `sentence` parameter (with gaps to-be-filled indicated by `#w`). 
+   * Each button click adds one element to the sentence. 
+   * Elements can be whole words or smaller pieces (syllables or morphemes).
    *
    * @author Aislinn Keogh, Christian Mott and Bran Papineau
    * @see {@link /plugin-sentence-construction/README.md}
