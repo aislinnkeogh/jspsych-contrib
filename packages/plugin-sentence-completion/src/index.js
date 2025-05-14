@@ -46,20 +46,30 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         type: jspsych.ParameterType.STRING,
         default: "You must click every button at least once."
       },
-      /** Label to display on the button underneath the wordbank allowing the participant to clear the most recently filled gap. */
+      /** Label to display on the button underneath the wordbank allowing the participant to clear the most recently filled gap. This string can contain HTML markup. */
       undo_button_label: {
-        type: jspsych.ParameterType.STRING,
+        type: jspsych.ParameterType.HTML_STRING,
         default: "UNDO"
       },
-      /** Label to display on the button underneath the wordbank allowing the participant to submit their completed sentence. */
+      /** Label to display on the button underneath the wordbank allowing the participant to submit their completed sentence. This string can contain HTML markup. */
       submit_button_label: {
-        type: jspsych.ParameterType.STRING,
+        type: jspsych.ParameterType.HTML_STRING,
         default: "SUBMIT"
+      },
+      /** If true, then the Submit button will be disabled until the participant has filled all gaps in the sentence. If false, the participant is able to submit their sentence at any point. */
+      disable_submit_before_completion: {
+        type: jspsych.ParameterType.BOOL,
+        default: true
+      },
+      /** If true, then the buttons in the wordbank will be disabled once the participant has filled all gaps in the sentence. If false, the participant is still able to click buttons in the wordbank after filling all gaps (although nothing will happen when they do so). */
+      disable_wordbank_after_completion: {
+        type: jspsych.ParameterType.BOOL,
+        default: true
       },
       /** A function that generates the HTML for each button in the `choices` array. The function gets the string and index of the item in the `choices` array and should return valid HTML. If you want to use different markup for each button, you can do that by using a conditional on either parameter. The default parameter returns a button element with the text label of the choice. */
       button_html: {
         type: jspsych.ParameterType.FUNCTION,
-        default: function (choice) {
+        default: function (choice, choiceIndex) {
           return `<button class="jspsych-btn">${choice}</button>`;
         },
       },
@@ -196,6 +206,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
           if ((trial.allow_duplicates) || !choices_used.includes(choice)) {
             wordClicked(choice);
             choices_used.push(choice);
+            updateButtonHTML();
           } else {
             alert(trial.duplicates_warning);
           }
@@ -222,7 +233,11 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       submit.id = 'submit';
       submit.setAttribute(`class`, `jspsych-btn`);
       submit.textContent = trial.submit_button_label;
+      if (trial.disable_submit_before_completion && !(choices_used.length==n_gaps)) {
+        submit.setAttribute("disabled", "disabled");
+      }
       fnElement.appendChild(submit);
+
             
       submit.onclick = function() {
           submitClicked();
@@ -232,6 +247,9 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
 
       // End of trial function
       const end_trial = () => {
+        // measure rt
+        let end_time = performance.now();
+        rt = Math.round(end_time - start_time);
         // gather the data to store for the trial
         var trial_data = {
           rt: rt,
@@ -245,25 +263,23 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
 
       // Functions
       function undoClicked() {
-          if (sentences.length > 1) {
-            sentences.pop();
-            addText(sentences[sentences.length-1]);
-            choices_used.pop();
-          }
+        if (sentences.length > 1) {
+          sentences.pop();
+          addText(sentences[sentences.length-1]);
+          choices_used.pop();
+        }
+        updateButtonHTML()
       }
 
       function submitClicked() {
-        // measure rt
-        let end_time = performance.now();
-        rt = Math.round(end_time - start_time);
-
-        // Check
+        // Check whether all gaps have been filled
         let all_gaps_filled;
         if (choices_used.length==n_gaps) {
           all_gaps_filled = true
         } else {
           all_gaps_filled = false
         };
+        // If use_all_buttons is true, check if all buttons have indeed been used
         let buttons_used;
         if (trial.use_all_buttons) {
           if (trial.choices.sort().join(",")==choices_used.sort().join(",")) {
@@ -277,6 +293,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         if (all_gaps_filled && buttons_used) {
           end_trial();
         } else {
+          // TODO BUG: this will give the warning about using all buttons even if the reason the checks failed is that all gaps haven't been filled, need
           alert(trial.all_buttons_warning);
         }
       }
@@ -284,6 +301,30 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       // Function that handles word clicks
       function wordClicked(word) {            
           updateText(sentences[sentences.length-1], word);
+      }
+
+      function updateButtonHTML() {
+        // Check whether the Submit button needs to be enabled/disabled
+        if (trial.disable_submit_before_completion) {
+          if (choices_used.length==n_gaps) {
+            document.getElementById("submit").disabled=false;
+          } else {
+            document.getElementById("submit").disabled=true;
+          }
+        }
+
+        // Check whether the wordbank buttons need to be enabled/disabled
+        if (trial.disable_wordbank_after_completion) {
+          if (choices_used.length==n_gaps) {
+            for (const button of buttonGroupElement.children) {
+              button.setAttribute("disabled", "disabled")
+            }
+          } else {
+            for (const button of buttonGroupElement.children) {
+              button.removeAttribute("disabled")
+            }
+          }
+        }
       }
 
       function addText(sentence) {
