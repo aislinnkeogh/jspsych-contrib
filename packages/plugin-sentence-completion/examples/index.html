@@ -21,16 +21,16 @@
 
   const trial = {
     type: jsPsychPluginSentenceConstruction,
-    sentence: null,
+    sentence: `The #w #w the #w.`,
     stimulus: `<img src="example_img.png" height=300></img>`,
-    choices: ["wizard", "pushes", "princess"],
+    choices: ["wizard", "pushes", "princess", "dragon", "gift", "give", "give", "-s"],
     randomize_order: true,
     allow_duplicates: false,
     disable_buttons_after_click: true,
     use_all_buttons: false,
     disable_wordbank_after_completion: false,
     grid_rows: 1,
-    right_to_left: true,
+    right_to_left: false,
   };
 
   jsPsych.run([trial])

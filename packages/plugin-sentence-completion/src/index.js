@@ -176,7 +176,8 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
       }
       
       // Initialize array of choices used (for end-of-trial checks)
-      let choices_used = [];
+      let choices_used_obj = {};
+      let choices_used = Object.values(choices_used_obj);
       
       // Create html element for stimulus
       const stimulusElement = document.createElement("div");
@@ -230,15 +231,11 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
         const buttonElement = buttonGroupElement.lastChild;
         buttonElement.dataset.choice = choiceIndex.toString();
         buttonElement.addEventListener("click", () => {
-          if ((trial.allow_duplicates) || !choices_used.includes(choice)) {
-            choices_used.push(choice);
-            wordClicked(choice);
-            if (trial.sentence != null) {
-              updateButtonHTML();
-            }
-          } else {
-            alert(trial.duplicates_warning);
-          }
+          let index = Object.keys(choices_used_obj).length + 1;
+          choices_used_obj[choiceIndex] = [choice, index];
+          choices_used = Object.values(choices_used_obj).map((x) => x[0]);
+          wordClicked(choice);
+          updateButtonHTML();
         });
       }
 
@@ -316,14 +313,14 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
         if (sentences.length > 1) {
           sentences.pop();
           addText(sentences[sentences.length-1]);
-          choices_used.pop();
+          let del = Object.keys(choices_used_obj).filter((x) => choices_used_obj[x][1] == choices_used.length);
+          delete choices_used_obj[del[0]];
+          choices_used = Object.values(choices_used_obj).map((x) => x[0]);
         } 
         if ((choices_used.length === 0) && (trial.sentence === null)) {
             displayUnderline();
         }
-        if (trial.sentence != null) {
-          updateButtonHTML();
-        }
+        updateButtonHTML();
       }
 
       // Function that handles submit button
@@ -355,9 +352,7 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
       
       // Function that handles word clicks
       function wordClicked(word) {    
-          console.log(sentences);
           updateText(sentences, word);
-          console.log(sentences);
           addText(sentences[sentences.length-1]);
       }
 
@@ -378,7 +373,9 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
         let shouldDisableAll = false;
         if (trial.disable_wordbank_after_completion) {
           let buttons = buttonGroupElement.children;
-          shouldDisableAll = choices_used.length == n_gaps;
+          if (trial.sentence !== null) {
+            shouldDisableAll = choices_used.length == n_gaps;
+          }
           
           for (let button of buttons) {
             if (shouldDisableAll) {
@@ -390,14 +387,17 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
         }
 
         // If the researcher has selected to disable buttons after clicking, then disable the buttons that have been used
-        if (trial.disable_buttons_after_click) {
+        if (!trial.allow_duplicates) {
           let buttons = buttonGroupElement.children;
 
           for (let button of buttons) {
-            if (choices_used.includes(button.innerHTML)) {
-              button.setAttribute("disabled", "disabled");
-            } else if (!shouldDisableAll) {
-              button.removeAttribute("disabled");
+            let disable = choices_used.includes(button.innerHTML) && Object.keys(choices_used_obj).includes(button.dataset.choice);
+            if (disable) {
+                button.setAttribute("disabled", "disabled");
+            } else {
+              if (!shouldDisableAll) {
+                button.removeAttribute("disabled");
+              }
             }
 
           }
