@@ -285,16 +285,13 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
 
       // Functions
       function undoClicked() {
-        if (sentences.length > 1 && sentences != null) {
+        if (sentences.length > 1) {
           sentences.pop();
           addText(sentences[sentences.length-1]);
           choices_used.pop();
-        } else {
-          choices_used.pop();
-          updateText(null, null);
-          if (choices_used.length === 0) {
+        } 
+        if ((choices_used.length === 0) && (trial.sentence === null)) {
             displayUnderline();
-          }
         }
         if (trial.sentence != null) {
           updateButtonHTML();
@@ -331,11 +328,10 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       
       // Function that handles word clicks
       function wordClicked(word) {    
-        if (trial.sentence == null) {       
-          updateText(null, word);
-        } else {
+          console.log(sentences);
           updateText(sentences[sentences.length-1], word);
-        }
+          console.log(sentences);
+          addText(sentences[sentences.length-1]);
       }
 
       function displayUnderline() {
@@ -369,37 +365,35 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         text.innerHTML = '';
 
         let ftext;
-        ftext = replaceSpaces(sentence, wordSpaces);
-        ftext = ftext.replaceAll("#w#w", "____&nbsp;____");
-        ftext = ftext.replaceAll("#w", "____");
-        ftext = ftext.replaceAll("#b", "<br>");
-
+        if (sentence == null) {
+          ftext = sentence;
+        } else {
+          ftext = replaceSpaces(sentence, wordSpaces);
+          ftext = ftext.replaceAll("#w#w", "____&nbsp;____");
+          ftext = ftext.replaceAll("#w", "____");
+          ftext = ftext.replaceAll("#b", "<br>");
+        }
         text.innerHTML += ftext;
       }
 
       function updateText(sentence, word) {
-        const text = document.getElementById('textContainer');
+
+        let newSentence;
+        let nospace = false;
+
+        if (word.startsWith("-")) {
+          word = word.replace(`-`, ``);
+          nospace = true;
+        }
         
-        if (sentence == null) {
-          text.innerHTML = '';
-          for (let i = 0; i < choices_used.length; i++) {
-            if (choices_used[i].startsWith("-")) {
-              let strippedMorpheme = choices_used[i].replace(`-`, ``);
-              text.innerHTML += strippedMorpheme;
-            } else {
-              text.innerHTML += (i === 0 ? '' : ' ') + choices_used[i];
-            }
-          }
-        } else {
-          const newSentence = sentence.replace("#w", word);
+        if (trial.sentence == null) {
+          nospace = sentence.length === 0 || nospace;
+          newSentence = sentence += (nospace ? '' : ' ') + word;
           sentences.push(newSentence);
 
-          let ftext = replaceSpaces(newSentence, 6);
-          ftext = ftext.replaceAll("#w#w", "____&nbsp;____");
-          ftext = ftext.replaceAll("#w", "____");
-          ftext = ftext.replaceAll("#b", "<br>");
-          
-          text.innerHTML = ftext;
+        } else {
+          newSentence = sentence.replace("#w", word);
+          sentences.push(newSentence);
         }
       }
 
