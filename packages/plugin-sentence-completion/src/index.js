@@ -71,10 +71,6 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         type: jspsych.ParameterType.BOOL,
         default: true
       },
-      disable_buttons_after_click: {
-        type: jspsych.ParameterType.BOOL,
-        default: true
-      },
       /** A function that generates the HTML for each button in the `choices` array. The function gets the string and index of the item in the `choices` array and should return valid HTML. If you want to use different markup for each button, you can do that by using a conditional on either parameter. The default parameter returns a button element with the text label of the choice. */
       button_html: {
         type: jspsych.ParameterType.FUNCTION,
