@@ -71,6 +71,10 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         type: jspsych.ParameterType.BOOL,
         default: true
       },
+      disable_buttons_after_click: {
+        type: jspsych.ParameterType.BOOL,
+        default: true
+      },
       /** A function that generates the HTML for each button in the `choices` array. The function gets the string and index of the item in the `choices` array and should return valid HTML. If you want to use different markup for each button, you can do that by using a conditional on either parameter. The default parameter returns a button element with the text label of the choice. */
       button_html: {
         type: jspsych.ParameterType.FUNCTION,
@@ -112,6 +116,11 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       grid_columns: {
         type: jspsych.ParameterType.INT,
         default: null,
+      },
+      /** The number of spaces between words in the fill-in-the-blank sentence. */
+      spaces_between_words: {
+        type: jspsych.ParameterType.INT,
+        default: 6,
       }
     },
     data: {
@@ -146,7 +155,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
     trial(display_element, trial) {
 
       // Set spaces between words
-      let wordSpaces = 6;
+      let wordSpaces = trial.spaces_between_words;
       // Record start time and declare rt
       let start_time = performance.now();
       let rt;
@@ -346,7 +355,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       // Function that handles word clicks
       function wordClicked(word) {    
           console.log(sentences);
-          updateText(sentences[sentences.length-1], word);
+          updateText(sentences, word);
           console.log(sentences);
           addText(sentences[sentences.length-1]);
       }
@@ -363,18 +372,33 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         }
 
         // Check whether the wordbank buttons need to be enabled/disabled
+        let shouldDisableAll = false;
         if (trial.disable_wordbank_after_completion) {
-          const buttons = buttonGroupElement.children;
-          const shouldDisable = choices_used.length == n_gaps;
+          let buttons = buttonGroupElement.children;
+          shouldDisableAll = choices_used.length == n_gaps;
           
-          for (const button of buttons) {
-            if (shouldDisable) {
+          for (let button of buttons) {
+            if (shouldDisableAll) {
               button.setAttribute("disabled", "disabled");
             } else {
               button.removeAttribute("disabled");
             }
           }
         }
+
+        if (trial.disable_buttons_after_click) {
+          let buttons = buttonGroupElement.children;
+
+          for (let button of buttons) {
+            if (choices_used.includes(button.innerHTML)) {
+              button.setAttribute("disabled", "disabled");
+            } else if (!shouldDisableAll) {
+              button.removeAttribute("disabled");
+            }
+
+          }
+        }
+
       }
 
       function addText(sentence) {
@@ -393,8 +417,9 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         text.innerHTML += ftext;
       }
 
-      function updateText(sentence, word) {
-
+      function updateText(sentences, word) {
+        
+        let sentence = sentences[sentences.length-1];
         let newSentence;
         let nospace = false;
 

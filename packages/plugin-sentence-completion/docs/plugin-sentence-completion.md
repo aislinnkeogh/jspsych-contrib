@@ -1,6 +1,6 @@
 # plugin-sentence-completion
 
-Shows the participant a sentence containing some gaps, and a bank of buttons. Each button click fills in one gap.
+Shows the participant either a sentence containing some gaps (when a sentence with gaps indicated by '#w' is entered as the 'sentence' parameter) or a blank line (when the sentence parameter is empty), and a bank of buttons. Each button click fills in a gap or adds to the sentence.
 
 ## Parameters
 
@@ -8,7 +8,7 @@ In addition to the [parameters available in all plugins](https://www.jspsych.org
 
 | Parameter           | Type             | Default Value      | Description                              |
 | ------------------- | ---------------- | ------------------ | ---------------------------------------- |
-| sentence            | string           | undefined          | The sentence for the participant to complete. Each #w will be replaced with one gap to be filled. Whitespace in the displayed sentence is determined by whitespace in the provided string e.g. #w#w will display two adjacent gaps (i.e. syllables/morphemes within a word), while #w #w will display two gaps separated by whitespace (i.e. separate words). |
+| sentence            | string           | undefined          | The sentence for the participant to complete. Each #w will be replaced with one gap to be filled. Whitespace in the displayed sentence is determined by whitespace in the provided string e.g. #w#w will display two adjacent gaps (i.e. syllables/morphemes within a word), while #w #w will display two gaps separated by whitespace (i.e. separate words). If this parameter is null, participants will start with a blank line and build a sentence with their button presses. |
 | choices             | array of strings | undefined          | Labels for the buttons. Each different string in the array will generate a different button in the wordbank. |
 | stimulus            | HTML string      | null               | An HTML string to be displayed if the participant is completing the sentence based on some stimulus (e.g. an image that they need to describe). |
 | randomize_order     | boolean          | true               | If true, then the buttons in the wordbank will be randomly shuffled. |
@@ -18,10 +18,13 @@ In addition to the [parameters available in all plugins](https://www.jspsych.org
 | all_buttons_warning | string           | 'You must click every button at least once.' | Text to display if use_all_buttons is true and the participant attempts to submit the sentence without clicking all buttons at least once. |
 | undo_button_label   | HTML string      | 'UNDO'             | Label to display on the button underneath the wordbank allowing the participant to clear the most recently filled gap. This string can contain HTML markup. |
 | submit_button_label | HTML string      | 'SUBMIT'           | Label to display on the button underneath the wordbank allowing the participant to submit their completed sentence. This string can contain HTML markup. |
+| disable_submit_before_completion     | boolean          | true              | If true, then the submit button will be disabled until the participant has filled all gaps in the sentence. If false, the participant is able to submit their sentence at any point. |
+| disable_wordbank_after_completion     | boolean          | true              | If true, then the buttons in the wordbank will be disabled once the participant has filled all gaps in the sentence. If false, the participant is still able to click buttons in the wordbank after filling all gaps (although nothing will happen when they do so). |
 | button_html         | function         | `(choice)=>'<button class="jspsych-btn">${choice}</button>';` | A function that generates the HTML for each button in the `choices` array. The function gets the string and index of the item in the `choices` array and should return valid HTML. If you want to use different markup for each button, you can do that by using a conditional on either parameter. The default parameter returns a button element with the text label of the choice. |
 | prompt              | HTML string      | null               | This string can contain HTML markup. Any content here will be displayed below the stimulus. The intention is that it can be used to provide a reminder about the action the participant is supposed to take. |
 | stimulus_duration   | numeric          | null               | How long to display the stimulus, in milliseconds. The visibility CSS property of the stimulus will be set to `hidden` after this time has elapsed. If this is null, then the stimulus will remain visible until the trial ends. |
 | trial_duration      | numeric          | null               | How long to wait for the participant to make a response before ending the trial, in milliseconds. If the participant fails to make a response before this timer is reached, the participant's response will be recorded as null for the trial and the trial will end. If the value of this parameter is null, the trial will wait for a response indefinitely. |
+| max_width      | numeric          | 600               | The maximum  width of the text on the screen. |
 | button_layout       | string           | 'grid'             | Setting to `'grid'` will make the container element have the CSS property `display: grid` and enable the use of `grid_rows` and `grid_columns`. Setting to `'flex'` will make the container element have the CSS property `display: flex`. You can customize how the buttons are laid out by adding inline CSS in the `button_html` parameter. |
 | grid_rows           | numeric          | 1                  | The number of rows in the button grid. Only applicable when `button_layout` is set to `'grid'`. If null, the number of rows will be determined automatically based on the number of buttons and the number of columns. |
 | grid_columns        | numeric          | null               | The number of columns in the button grid. Only applicable when `button_layout` is set to `'grid'`. If null, the number of columns will be determined automatically based on the number of buttons and the number of rows.

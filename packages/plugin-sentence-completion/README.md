@@ -2,11 +2,25 @@
 
 ## Overview
 
-Shows the participant a sentence containing some gaps, and a bank of buttons. Each button click fills in one gap.
+Shows the participant either a sentence containing some gaps (when a string is entered as the 'sentence' argument) or a blank line (when there is no 'sentence' argument), and a bank of buttons. Each button click fills in a gap.
 
 ## Loading
 
-*Enter instructions for loading the plugin package here.*
+### In browser
+
+```js
+<script src="https://unpkg.com/@jspsych-contrib/plugin-sentence-completion@0.0.1"></script>
+```
+
+### Via NPM
+
+```
+npm install @jspsych-contrib/plugin-sentence-completion
+```
+
+```js
+import jsPsychPluginSentenceCompletion from '@jspsych-contrib/plugin-sentence-completion';
+```
 
 ## Compatibility
 
