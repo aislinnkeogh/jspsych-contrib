@@ -245,9 +245,11 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
 
       // Functions
       function undoClicked() {
-          sentences.pop();
-          addText(sentences[sentences.length-1]);
-          choices_used.pop();
+          if (sentences.length > 1) {
+            sentences.pop();
+            addText(sentences[sentences.length-1]);
+            choices_used.pop();
+          }
       }
 
       function submitClicked() {
