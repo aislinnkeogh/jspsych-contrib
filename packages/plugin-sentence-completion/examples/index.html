@@ -5,7 +5,7 @@
   <title>jsPsychPluginSentenceCompletion Example</title>
   <script src="https://unpkg.com/jspsych"></script>
   <!-- Load the published plugin package here, e.g.
-<script src="https://unpkg.com/plugin-sentence-completion"></script>
+<script src="https://unpkg.com/plugin-sentence-construction"></script>
 <script src="../dist/index.global.js"></script> -->
   <script src="../src/index.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/jspsych/css/jspsych.css">
@@ -20,8 +20,8 @@
   });
 
   const trial = {
-    type: jsPsychPluginSentenceCompletion,
-    sentence: `The #w #w the #w`,
+    type: jsPsychPluginSentenceConstruction,
+    sentence: null,
     stimulus: `<img src="example_img.png" height=300></img>`,
     choices: ["wizard", "pushes", "princess"],
     randomize_order: true,
@@ -29,7 +29,8 @@
     disable_buttons_after_click: true,
     use_all_buttons: false,
     disable_wordbank_after_completion: false,
-    grid_rows: 1
+    grid_rows: 1,
+    right_to_left: true,
   };
 
   jsPsych.run([trial])

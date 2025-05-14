@@ -1,8 +1,8 @@
-var jsPsychPluginSentenceCompletion = (function (jspsych) {
+var jsPsychPluginSentenceConstruction = (function (jspsych) {
   "use strict";
 
   const info = {
-    name: "plugin-sentence-completion",
+    name: "plugin-sentence-construction",
     version: "0.0.1",
     parameters: {
       /** The sentence for the participant to complete. Each #w will be replaced with one gap to be filled. Whitespace in the displayed sentence is determined by whitespace in the provided string e.g. #w#w will display two adjacent gaps (i.e. syllables/morphemes within a word), while #w #w will display two gaps separated by whitespace (i.e. separate words). */
@@ -137,14 +137,14 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
   };
 
   /**
-   * **plugin-sentence-completion**
+   * **plugin-sentence-construction**
    *
    * Shows the participant a sentence containing some gaps, and a bank of buttons. Each button click fills in one gap.
    *
    * @author Aislinn Keogh, Christian Mott and Bran Papineau
-   * @see {@link /plugin-sentence-completion/README.md}
+   * @see {@link /plugin-sentence-construction/README.md}
    */
-  class SentenceCompletionPlugin {
+  class SentenceConstructionPlugin {
     constructor(jsPsych) {
       this.jsPsych = jsPsych;
     }
@@ -301,7 +301,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         var trial_data = {
           rt: rt,
           sentence: trial.sentence,
-          response: defineResponse(),
+          response: sentences[sentences.length - 1],
         };
 
         // move on to the next trial
@@ -428,18 +428,9 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
           nospace = sentence.length === 0 || nospace;
           newSentence = sentence += (nospace ? '' : ' ') + word;
           sentences.push(newSentence);
-
         } else {
           newSentence = sentence.replace("#w", word);
           sentences.push(newSentence);
-        }
-      }
-
-      function defineResponse() {
-        if (trial.sentence == null) {
-          return choices_used.join(' ');
-      } else {
-          return sentences[sentences.length - 1];
         }
       }
 
@@ -521,7 +512,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
 
     }
   }
-  SentenceCompletionPlugin.info = info;
+  SentenceConstructionPlugin.info = info;
 
-  return SentenceCompletionPlugin;
+  return SentenceConstructionPlugin;
 })(jsPsychModule);
