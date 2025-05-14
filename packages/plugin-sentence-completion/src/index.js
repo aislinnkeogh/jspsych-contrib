@@ -365,7 +365,7 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
       // Function that updates button group 
       function updateButtonHTML() {
         // Check whether the Submit button needs to be enabled/disabled
-        if (trial.disable_submit_before_completion) {
+        if (trial.disable_submit_before_completion && !trial.sentence==null) {
           document.getElementById("submit").disabled = !(choices_used.length == n_gaps);
         }
 
