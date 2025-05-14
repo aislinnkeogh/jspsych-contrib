@@ -290,7 +290,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
 
           let ftext;
           ftext = replaceSpaces(sentence, 6);
-          ftext = ftext.replaceAll("#w#w", "____ ____");
+          ftext = ftext.replaceAll("#w#w", "____&nbsp;____");
           ftext = ftext.replaceAll("#w", "____");
 
           text.innerHTML += ftext;
@@ -302,7 +302,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
           sentences.push(sentence.replace("#w", word));
 
           ftext = replaceSpaces(sentences[sentences.length-1], 6);
-          ftext = ftext.replaceAll("#w#w", "____ ____");
+          ftext = ftext.replaceAll("#w#w", "____&nbsp;____");
           ftext = ftext.replaceAll("#w", "____");
           
           text.innerHTML = ``;
@@ -315,6 +315,8 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
           return str.replace(/ /g, spaces);
       }
 
+      // Function to wrap the text the way we want
+      // FIX THIS
       function wrapText(elementId, maxWidth) {
         const element = document.getElementById(elementId);
         if (element) {
