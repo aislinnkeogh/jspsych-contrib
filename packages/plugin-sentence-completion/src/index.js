@@ -31,16 +31,6 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
         type: jspsych.ParameterType.BOOL,
         default: true
       },
-      /** Text to display if `allow_duplicates` is false and the participant attempts to click a button that has already been clicked again. */
-      duplicates_warning: {
-        type: jspsych.ParameterType.STRING,
-        default: "You cannot click the same button more than once."
-      },
-      /** If true and `allow_duplicates` is false, each button in the wordbank will be disabled after it has been clicked. */
-      disable_buttons_after_click: {
-        type: jspsych.ParameterType.BOOL,
-        default: false
-      },
       /** If true, then the participant will be required to click every button in the wordbank at least once before they can submit the sentence. */
       use_all_buttons: {
         type: jspsych.ParameterType.BOOL,
