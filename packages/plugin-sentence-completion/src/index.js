@@ -36,6 +36,11 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         type: jspsych.ParameterType.STRING,
         default: "You cannot click the same button more than once."
       },
+      /** If true and `allow_duplicates` is false, each button in the wordbank will be disabled after it has been clicked. */
+      disable_buttons_after_click: {
+        type: jspsych.ParameterType.BOOL,
+        default: false
+      },
       /** If true, then the participant will be required to click every button in the wordbank at least once before they can submit the sentence. */
       use_all_buttons: {
         type: jspsych.ParameterType.BOOL,
@@ -319,14 +324,11 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         if (trial.sentence != null) {
           all_gaps_filled = choices_used.length == n_gaps;
         }
-        
-        // Check if all buttons have been used when required
+
+        // If use_all_buttons is true, check if all buttons have indeed been used
         let buttons_used = true;
         if (trial.use_all_buttons) {
-          const used_set = new Set(choices_used);
-          const choices_set = new Set(trial.choices);
-          buttons_used = used_set.size === choices_set.size && 
-            [...used_set].every(value => choices_set.has(value));
+          buttons_used = trial.choices.sort().join(",")==choices_used.sort().join(",")
         }
         
         if (all_gaps_filled && buttons_used) {

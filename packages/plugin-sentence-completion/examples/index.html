@@ -21,16 +21,15 @@
 
   const trial = {
     type: jsPsychPluginSentenceCompletion,
-    sentence: `The #w #w#w the #w a #w, which was the #w #w #w that #w had ever #w, until the #w #w a #w, which #w after #w.`,
-    choices: ["wizard", "give", "-s", "queen", "gift"],
+    sentence: `The #w #w the #w`,
+    stimulus: `<img src="example_img.png" height=300></img>`,
+    choices: ["wizard", "pushes", "princess"],
     randomize_order: true,
-    allow_duplicates: true,
+    allow_duplicates: false,
+    disable_buttons_after_click: true,
     use_all_buttons: false,
-    grid_rows: 2, 
-    prompt: "Use the buttons to complete the sentence.",
-    trial_duration: 5000,
-    stimulus_duration: 1000,
-    stimulus: "Hello world!",
+    disable_wordbank_after_completion: false,
+    grid_rows: 1
   };
 
   jsPsych.run([trial])
