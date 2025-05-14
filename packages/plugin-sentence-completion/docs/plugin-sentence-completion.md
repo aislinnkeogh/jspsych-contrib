@@ -41,16 +41,35 @@ In addition to the [default data collected by all plugins](https://www.jspsych.o
 | sentence  | string  | The starting sentence presented to the participant. |
 | response  | string  | The final sentence the participant submitted. |
 
-## Install
-
-*Enter instructions for installing the plugin package here.*
-
 ## Examples
 
-### Title of Example
+### Example with sentence frame
 
 ```javascript
-var trial = {
-  type: jsPsychPluginSentenceCompletion
-}
+let trial = {
+    type: jsPsychPluginSentenceConstruction,
+    sentence: `The #w #w#w the #w.`,
+    stimulus: `<img src="example_img.png" height=400></img>`,
+    choices: ["wizard", "push", "-es", "princess", "dragon", "gift", "give", "give", "-s"],
+    randomize_order: true,
+    allow_duplicates: false,
+    use_all_buttons: false,
+    disable_wordbank_after_completion: false,
+    grid_rows: 1
+  };
+```
+
+### Example without sentence frame
+
+```javascript
+let trial = {
+    type: jsPsychPluginSentenceConstruction,
+    stimulus: `<img src="example_img.png" height=400></img>`,
+    choices: ["wizard", "push", "-es", "princess", "dragon", "gift", "give", "give", "-s"],
+    randomize_order: true,
+    allow_duplicates: false,
+    use_all_buttons: false,
+    disable_wordbank_after_completion: false,
+    grid_rows: 1
+  };
 ```
