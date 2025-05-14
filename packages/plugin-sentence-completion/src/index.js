@@ -3,12 +3,12 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
 
   const info = {
     name: "plugin-sentence-completion",
-    version: "0.0.1", // When working in a Javascript environment with no build, you will need to manually put set the version information. This is used for metadata purposes and publishing.
+    version: "0.0.1",
     parameters: {
       /** The sentence for the participant to complete. Each #w will be replaced with one gap to be filled. Whitespace in the displayed sentence is determined by whitespace in the provided string e.g. #w#w will display two adjacent gaps (i.e. syllables/morphemes within a word), while #w #w will display two gaps separated by whitespace (i.e. separate words). */
       sentence: {
         type: jspsych.ParameterType.STRING,
-        default: undefined,
+        default: null,
       },
       /** Labels for the buttons. Each different string in the array will generate a different button in the wordbank. */
       choices: {
@@ -102,7 +102,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       grid_columns: {
         type: jspsych.ParameterType.INT,
         default: null,
-      },
+      }
     },
     data: {
       /** The response time in milliseconds for the participant to make a response. The time is measured from when the stimulus first appears on the screen until the participant's response. */
@@ -117,11 +117,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       response: {
         type: jspsych.ParameterType.STRING,
       },
-      // When working in a Javascript environment with no build, you will need to manually put the citations information.
-      // You may find it useful to fill in the CITATION.cff file generated with this package and use this script to generate your citations:
-      // https://github.com/jspsych/jsPsych/blob/main/packages/config/generateCitations.js
-      // This is helpful for users of your plugin to easily cite it.
-      citations: '__CITATIONS__', // prettier-ignore
+      citations: '__CITATIONS__',
     },
   };
 
@@ -138,7 +134,6 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       this.jsPsych = jsPsych;
     }
     trial(display_element, trial) {
-
       // Record start time and declare rt
       let start_time = performance.now();
       let rt;
@@ -151,28 +146,38 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       // Create array of sentences (will append for quick undo)
       let sentences = [trial.sentence];
 
+      // Count gaps in sentence (for end-of-trial checks)
+      let n_gaps = 0;
+      if (trial.sentence != null) {
+        n_gaps = trial.sentence.split("#w").length - 1;
+      }
+      
       // Initialize array of choices used (for end-of-trial checks)
       let choices_used = [];
-
-      // Count gaps in sentence (for end-of-trial checks)
-      let n_gaps;
-      n_gaps = trial.sentence.split("#w").length-1;
-
+      
       // Create html element for stimulus
       const stimulusElement = document.createElement("div");
       stimulusElement.id = "jspsych-html-button-response-stimulus";
       stimulusElement.innerHTML = trial.stimulus;
-
       display_element.appendChild(stimulusElement);
+
+      // Create prompt element if provided
+      if (trial.prompt !== null) {
+        display_element.insertAdjacentHTML("beforeend", `<div id="jspsych-html-button-response-prompt">${trial.prompt}</div><br><br>`);
+      }
 
       // Create html element for text
       const textElement = document.createElement("div");
       textElement.id = "textContainer";
-
       display_element.appendChild(textElement);
-      addText(sentences[0]);
-
-      wrapText("textContainer", 600)
+      
+      if (trial.sentence == null) {
+        displayUnderline();
+      } else {
+        addText(sentences[0]);
+      }
+      
+      wrapText("textContainer", 600);
 
       // Create word buttons
       const buttonGroupElement = document.createElement("div");
@@ -204,9 +209,11 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         buttonElement.dataset.choice = choiceIndex.toString();
         buttonElement.addEventListener("click", () => {
           if ((trial.allow_duplicates) || !choices_used.includes(choice)) {
-            wordClicked(choice);
             choices_used.push(choice);
-            updateButtonHTML();
+            wordClicked(choice);
+            if (trial.sentence != null) {
+              updateButtonHTML();
+            }
           } else {
             alert(trial.duplicates_warning);
           }
@@ -226,21 +233,21 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
       fnElement.appendChild(undo);
             
       undo.onclick = function() {
-          undoClicked();
+        undoClicked();
       };
 
       const submit = document.createElement('button');
       submit.id = 'submit';
       submit.setAttribute(`class`, `jspsych-btn`);
       submit.textContent = trial.submit_button_label;
-      if (trial.disable_submit_before_completion && !(choices_used.length==n_gaps)) {
+      
+      if (trial.disable_submit_before_completion && !(choices_used.length == n_gaps) && trial.sentence != null) {
         submit.setAttribute("disabled", "disabled");
       }
       fnElement.appendChild(submit);
-
             
       submit.onclick = function() {
-          submitClicked();
+        submitClicked();
       };
 
       display_element.appendChild(fnElement);
@@ -254,7 +261,7 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
         var trial_data = {
           rt: rt,
           sentence: trial.sentence,
-          response: sentences[sentences.length-1],
+          response: defineResponse(),
         };
 
         // move on to the next trial
@@ -263,112 +270,144 @@ var jsPsychPluginSentenceCompletion = (function (jspsych) {
 
       // Functions
       function undoClicked() {
-        if (sentences.length > 1) {
+        if (sentences.length > 1 && sentences != null) {
           sentences.pop();
           addText(sentences[sentences.length-1]);
           choices_used.pop();
+        } else {
+          choices_used.pop();
+          updateText(null, null);
+          if (choices_used.length === 0) {
+            displayUnderline();
+          }
         }
-        updateButtonHTML()
+        if (trial.sentence != null) {
+          updateButtonHTML();
+        }
       }
 
       function submitClicked() {
         // Check whether all gaps have been filled
-        let all_gaps_filled;
-        if (choices_used.length==n_gaps) {
-          all_gaps_filled = true
-        } else {
-          all_gaps_filled = false
-        };
-        // If use_all_buttons is true, check if all buttons have indeed been used
-        let buttons_used;
+        let all_gaps_filled = true;
+        if (trial.sentence != null) {
+          all_gaps_filled = choices_used.length == n_gaps;
+        }
+        
+        // Check if all buttons have been used when required
+        let buttons_used = true;
         if (trial.use_all_buttons) {
-          if (trial.choices.sort().join(",")==choices_used.sort().join(",")) {
-            buttons_used = true
-          } else {
-            buttons_used = false
-          }
-        } else {
-          buttons_used = true
-        };
+          const used_set = new Set(choices_used);
+          const choices_set = new Set(trial.choices);
+          buttons_used = used_set.size === choices_set.size && 
+            [...used_set].every(value => choices_set.has(value));
+        }
+        
         if (all_gaps_filled && buttons_used) {
           end_trial();
         } else {
-          // TODO BUG: this will give the warning about using all buttons even if the reason the checks failed is that all gaps haven't been filled, need
-          alert(trial.all_buttons_warning);
+          // Show appropriate warning message
+          if (!all_gaps_filled) {
+            alert("Please fill all gaps in the sentence before submitting.");
+          } else {
+            alert(trial.all_buttons_warning);
+          }
         }
       }
       
       // Function that handles word clicks
-      function wordClicked(word) {            
+      function wordClicked(word) {    
+        if (trial.sentence == null) {       
+          updateText(null, word);
+        } else {
           updateText(sentences[sentences.length-1], word);
+        }
+      }
+
+      function displayUnderline() {
+        let text = document.getElementById('textContainer');
+        text.innerHTML = '___________';
       }
 
       function updateButtonHTML() {
         // Check whether the Submit button needs to be enabled/disabled
         if (trial.disable_submit_before_completion) {
-          if (choices_used.length==n_gaps) {
-            document.getElementById("submit").disabled=false;
-          } else {
-            document.getElementById("submit").disabled=true;
-          }
+          document.getElementById("submit").disabled = !(choices_used.length == n_gaps);
         }
 
         // Check whether the wordbank buttons need to be enabled/disabled
         if (trial.disable_wordbank_after_completion) {
-          if (choices_used.length==n_gaps) {
-            for (const button of buttonGroupElement.children) {
-              button.setAttribute("disabled", "disabled")
-            }
-          } else {
-            for (const button of buttonGroupElement.children) {
-              button.removeAttribute("disabled")
+          const buttons = buttonGroupElement.children;
+          const shouldDisable = choices_used.length == n_gaps;
+          
+          for (const button of buttons) {
+            if (shouldDisable) {
+              button.setAttribute("disabled", "disabled");
+            } else {
+              button.removeAttribute("disabled");
             }
           }
         }
       }
 
       function addText(sentence) {
-          let text = document.getElementById('textContainer');
-          text.innerHTML = ``;
+        let text = document.getElementById('textContainer');
+        text.innerHTML = '';
 
-          let ftext;
-          ftext = replaceSpaces(sentence, 6);
-          ftext = ftext.replaceAll("#w#w", "____&nbsp;____");
-          ftext = ftext.replaceAll("#w", "____");
+        let ftext;
+        ftext = replaceSpaces(sentence, 6);
+        ftext = ftext.replaceAll("#w#w", "____&nbsp;____");
+        ftext = ftext.replaceAll("#w", "____");
 
-          text.innerHTML += ftext;
+        text.innerHTML += ftext;
       }
 
       function updateText(sentence, word) {
-          let text = document.getElementById('textContainer');
-          let ftext;
-          sentences.push(sentence.replace("#w", word));
+        const text = document.getElementById('textContainer');
+        
+        if (sentence == null) {
+          text.innerHTML = '';
+          for (let i = 0; i < choices_used.length; i++) {
+            if (choices_used[i].startsWith("-")) {
+              let strippedMorpheme = choices_used[i].replace(`-`, ``);
+              text.innerHTML += strippedMorpheme;
+            } else {
+              text.innerHTML += (i === 0 ? '' : ' ') + choices_used[i];
+            }
+          }
+        } else {
+          const newSentence = sentence.replace("#w", word);
+          sentences.push(newSentence);
 
-          ftext = replaceSpaces(sentences[sentences.length-1], 6);
+          let ftext = replaceSpaces(newSentence, 6);
           ftext = ftext.replaceAll("#w#w", "____&nbsp;____");
           ftext = ftext.replaceAll("#w", "____");
           
-          text.innerHTML = ``;
-          text.innerHTML += ftext;
+          text.innerHTML = ftext;
+        }
+      }
 
+      function defineResponse() {
+        if (trial.sentence == null) {
+          return choices_used.join(' ');
+      } else {
+          return sentences[sentences.length - 1];
+        }
       }
 
       function replaceSpaces(str, numSpaces) {
-          const spaces = '&nbsp;'.repeat(numSpaces);
-          return str.replace(/ /g, spaces);
+        const spaces = '&nbsp;'.repeat(numSpaces);
+        return str.replace(/ /g, spaces);
       }
 
       // Function to wrap the text the way we want
-      // FIX THIS
       function wrapText(elementId, maxWidth) {
         const element = document.getElementById(elementId);
         if (element) {
           element.style.width = maxWidth + "px";
-          element.style.overflowWrap = "break-word"; //or element.style.overflowWrap = "break-word"
+          element.style.overflowWrap = "break-word";
           element.style.whiteSpace = "normal";
         }
       }
-
     }
   }
   SentenceCompletionPlugin.info = info;

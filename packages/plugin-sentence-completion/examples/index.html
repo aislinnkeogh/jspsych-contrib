@@ -21,13 +21,13 @@
 
   const trial = {
     type: jsPsychPluginSentenceCompletion,
-    sentence: `The #w #w#w the #w to the #w, who #w to the #w and then #w down by the #w.`,
-    choices: ["wizard", "give", "s", "queen", "gift", "a", "b", "c", "d", "e", "f", "g", "h", "i",
-      "j", "k", "l", "m", "n"
-    ],
+    // sentence: "The wizard #w the queen a gift.",
+    choices: ["wizard", "give", "-s", "queen", "gift"],
     randomize_order: true,
-    allow_duplicates: false,
-    grid_rows: 3
+    allow_duplicates: true,
+    use_all_buttons: false,
+    grid_rows: 3, 
+    prompt: "Press a button to complete the sentence:",
   };
 
   jsPsych.run([trial])
