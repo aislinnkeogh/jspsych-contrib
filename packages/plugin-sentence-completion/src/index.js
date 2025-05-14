@@ -366,7 +366,6 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
       function updateButtonHTML() {
         // Check whether the Submit button needs to be enabled/disabled
         if (trial.disable_submit_before_completion && trial.sentence!==null) {
-          console.log(choices_used.length, n_gaps);
           document.getElementById("submit").disabled = !(choices_used.length == n_gaps);
         }
 
