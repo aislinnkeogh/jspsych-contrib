@@ -465,7 +465,6 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
               let windices = [...sentence.matchAll(new RegExp('#w', 'gi'))].map(a => a.index);
               let rindex = windices.pop();
               newSentence = sentence.substring(0, rindex) + word + sentence.substring(rindex+2);
-              console.log(windices, rindex, newSentence);
             } else {
               newSentence = sentence.replace("#w", word);
             }
