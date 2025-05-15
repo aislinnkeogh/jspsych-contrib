@@ -1,5 +1,5 @@
 {
-  "name": "plugin-sentence-completion",
+  "name": "plugin-sentence-construction",
   "version": "0.0.1",
   "description": "Shows the participant a sentence containing some gaps, and a bank of buttons. Each button click fills in one gap.",
   "unpkg": "dist/index.browser.min.js",
@@ -27,7 +27,7 @@
   "bugs": {
     "url": "https://github.com/aislinnkeogh/jspsych-contrib/issues"
   },
-  "homepage": "/plugin-sentence-completion/README.md",
+  "homepage": "/plugin-sentence-construction/README.md",
   "dependencies": {
     "jspsych": "^8.0.0",
     "@citation-js/core": "^0.7.14",

@@ -245,9 +245,13 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
         const buttonElement = buttonGroupElement.lastChild;
         buttonElement.dataset.choice = choiceIndex.toString();
         buttonElement.addEventListener("click", () => {
+          // TODO BUG FIX: need to change something here so there's a different entry in the choices_used_obj for every button click, even if they're duplicates
           let index = Object.keys(choices_used_obj).length + 1;
-          choices_used_obj[choiceIndex] = [choice, index];
+          choices_used_obj[index] = [choice, choiceIndex];
           choices_used = Object.values(choices_used_obj).map((x) => x[0]);
+          // Think I've fixed it by changing the object keys to the clicked index and values to button index but needs more testing
+          console.log(choices_used_obj)
+          console.log(choices_used)
           wordClicked(choice);
           updateButtonHTML();
         });
@@ -327,8 +331,11 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
         if (sentences.length > 1) {
           sentences.pop();
           addText(sentences[sentences.length-1]);
-          let del = Object.keys(choices_used_obj).filter((x) => choices_used_obj[x][1] == choices_used.length);
-          delete choices_used_obj[del[0]];
+          // let del = Object.keys(choices_used_obj).filter((x) => choices_used_obj[x][1] == choices_used.length);
+          let del = choices_used.length
+          // console.log(del)
+          // delete choices_used_obj[del[0]];
+          delete choices_used_obj[del];
           choices_used = Object.values(choices_used_obj).map((x) => x[0]);
         } 
         if ((choices_used.length === 0) && (trial.sentence === null)) {
@@ -405,7 +412,9 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
           let buttons = buttonGroupElement.children;
 
           for (let button of buttons) {
-            let disable = choices_used.includes(button.innerHTML) && Object.keys(choices_used_obj).includes(button.dataset.choice);
+            // let disable = choices_used.includes(button.innerHTML) && Object.keys(choices_used_obj).includes(button.dataset.choice);
+            console.log(typeof Object.values(choices_used_obj).map((x) => x[1])[0])
+            let disable = choices_used.includes(button.innerHTML) && Object.values(choices_used_obj).map((x) => x[1].toString()).includes(button.dataset.choice);
             if (disable) {
                 button.setAttribute("disabled", "disabled");
             } else {
@@ -413,10 +422,8 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
                 button.removeAttribute("disabled");
               }
             }
-
           }
         }
-
       }
 
       // Function that replaces spaces in the sentence with the correct number of spaces (if a frame is provided)
