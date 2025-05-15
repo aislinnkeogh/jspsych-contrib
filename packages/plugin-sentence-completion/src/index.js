@@ -161,13 +161,24 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
 
       // Create array of sentences (will append for quick undo)
       let sentences = [];
+      let sentence1;
+
+      // Reverse words in sentence if right_to_left is true
+      if (trial.right_to_left && trial.sentence !== null) {
+        sentence1 = trial.sentence.replaceAll('\.', ' #p');
+        sentence1 = sentence1.split(' ').reverse().join(' ');
+        sentence1 = sentence1.replaceAll('#p ', '\.');
+      } else {
+        sentence1 = trial.sentence;
+      }
+
+      // Add line breaks to sentence based on length
       if (trial.sentence !== null) {
-        sentences.push(addBreaks(trial.sentence));
+        sentences.push(addBreaks(sentence1));
       } else {
         sentences.push('');
       }
  
-
       // Count gaps in sentence (for end-of-trial checks)
       let n_gaps = 0;
       if (trial.sentence != null) {
@@ -184,16 +195,17 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
       stimulusElement.innerHTML = trial.stimulus;
       display_element.appendChild(stimulusElement);
 
-
       // Create html element for text
       const textElement = document.createElement("div");
       textElement.id = "textContainer";
       //textElement.style.width = trial.max_width + "px";
       textElement.style.overflowWrap = "normal";
       textElement.style.whiteSpace = "normal";
-      if (trial.right_to_left) {
-        textElement.style.direction = "rtl";
-      }
+      // Setting the direction this way was causing the errors
+      // replaced with code at beginning flipping the sentence
+      // if (trial.right_to_left) {
+        //textElement.style.direction = "rtl";
+      //}
 
       display_element.appendChild(textElement);
       
@@ -449,7 +461,14 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
             sentences.push(newSentence);
         } else {
             // For structured sentences with gaps marked by #w
-            newSentence = sentence.replace("#w", word);
+            if (trial.right_to_left) {
+              let windices = [...sentence.matchAll(new RegExp('#w', 'gi'))].map(a => a.index);
+              let rindex = windices.pop();
+              newSentence = sentence.substring(0, rindex) + word + sentence.substring(rindex+2);
+              console.log(windices, rindex, newSentence);
+            } else {
+              newSentence = sentence.replace("#w", word);
+            }
             sentences.push(newSentence);
         }
     }
