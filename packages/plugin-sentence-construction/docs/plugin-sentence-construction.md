@@ -50,12 +50,12 @@ let trial = {
     type: jsPsychPluginSentenceConstruction,
     sentence: `The #w #w#w the #w.`,
     stimulus: `<img src="example_img.png" height=400></img>`,
-    choices: ["wizard", "push", "-es", "princess", "dragon", "gift", "give", "give", "-s"],
+    choices: ["wizard", "push", "-es", "princess", "dragon", "gift", "give", "-s"],
     randomize_order: true,
     allow_duplicates: false,
     use_all_buttons: false,
     disable_wordbank_after_completion: false,
-    grid_rows: 1
+    grid_rows: 2
   };
 ```
 
@@ -65,9 +65,9 @@ let trial = {
 let trial = {
     type: jsPsychPluginSentenceConstruction,
     stimulus: `<img src="example_img.png" height=400></img>`,
-    choices: ["wizard", "push", "-es", "princess", "dragon", "gift", "give", "give", "-s"],
+    choices: ["wizard", "push", "-es", "princess", "dragon", "gift", "the", "give", "-s"],
     randomize_order: true,
-    allow_duplicates: false,
+    allow_duplicates: true,
     use_all_buttons: false,
     disable_wordbank_after_completion: false,
     grid_rows: 1
