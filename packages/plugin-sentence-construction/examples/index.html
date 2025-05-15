@@ -23,16 +23,29 @@
     type: jsPsychPluginSentenceConstruction,
     sentence: `The #w #w#w the #w.`,
     stimulus: `<img src="example_img.png" height=400></img>`,
-    choices: ["wizard", "push", "-es", "princess", "dragon", "gift", "give", "-s"], // choices to use with the sentence frame and use_all_buttons: false
-    // choices: ["wizard", "push", "-es", "princess"], // choices to use if use_all_buttons: true
-    // choices: ["wizard", "push", "-es", "princess", "dragon", "gift", "give", "-s", "the", "the"], // choices to use if sentence: null
+    choices: ["wizard", "push", "-es", "princess", "dragon", "gift", "give", "give", "-s"],
+    randomize_order: true,
     allow_duplicates: true,
     use_all_buttons: false,
-    disable_wordbank_after_completion: false,
-    grid_rows: 2
+    disable_wordbank_after_completion: true,
+    grid_rows: 1,
+    right_to_left: false,
   };
 
-  jsPsych.run([trial])
+  const trial2 = {
+    type: jsPsychPluginSentenceConstruction,
+    sentence: null,
+    stimulus: `<img src="example_img.png" height=400></img>`,
+    choices: ["הקוסם", "דוחף", "את", "הנסיכה"],
+    randomize_order: true,
+    allow_duplicates: false,
+    use_all_buttons: true,
+    disable_wordbank_after_completion: false,
+    grid_rows: 1,
+    right_to_left: false,
+    }
+
+  jsPsych.run([trial,trial2])
 </script>
 
 </html>
