@@ -275,8 +275,8 @@ var jsPsychPluginSentenceConstruction = (function (jspsych) {
       submit.textContent = trial.submit_button_label;
       
       
-      // Disable submit button if not all gaps filled and there is a sentence frame
-      if (trial.disable_submit_before_completion && !(choices_used.length == n_gaps) && trial.sentence != null) {
+      // Disable submit button if there is a sentence frame
+      if (trial.disable_submit_before_completion && trial.sentence != null) {
         submit.setAttribute("disabled", "disabled");
       }
       fnElement.appendChild(submit);
